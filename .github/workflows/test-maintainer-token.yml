@@ -1,0 +1,40 @@
+name: Test maintainer token (temporary)
+
+# Throwaway: runs the first-commit workflow's congratulation step, verbatim
+# except --comment instead of --approve (you can't approve your own PR).
+
+on:
+  pull_request:
+    branches: [main]
+
+permissions:
+  contents: read
+
+jobs:
+  token:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
+        with:
+          persist-credentials: false
+      - name: Stand in for the validator
+        id: check
+        run: echo "status=0" >> "$GITHUB_OUTPUT"
+
+      - name: Congratulate from the maintainer's account
+        # Posts .github/congrats/first-commit.md as an approving review from the
+        # MAINTAINER_TOKEN owner. Optional: skipped without the secret, and a
+        # failure here never blocks the merge. The token is only in this step's
+        # env, and this step runs only bash and the runner image's own /usr/bin tools.
+        if: steps.check.outputs.status == '0'
+        continue-on-error: false
+        env:
+          GH_TOKEN: ${{ secrets.MAINTAINER_TOKEN }}
+          PR: ${{ github.event.pull_request.number }}
+          LOGIN: ${{ github.event.pull_request.user.login }}
+        run: |
+          if [ -z "$GH_TOKEN" ]; then echo "MAINTAINER_TOKEN is missing"; exit 1; fi
+          # GitHub logins are only letters, digits and hyphens, so they are safe in sed.
+          case "$LOGIN" in *[!A-Za-z0-9-]*|"") echo "Unexpected login"; exit 1;; esac
+          /usr/bin/sed "s/{login}/$LOGIN/g" .github/congrats/first-commit.md > congrats.md
+          /usr/bin/gh pr review "$PR" --repo "$GITHUB_REPOSITORY" --comment --body-file congrats.md
