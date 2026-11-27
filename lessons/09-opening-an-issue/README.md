@@ -129,6 +129,8 @@ That one's right. Others aren't. Find a bug, then report it with the
 **Bug hunt** issue form (the exercise has the steps). A bot checks your
 report within a minute: it runs your command and compares the result
 with a correct splitbill, so it knows if your steps really show the bug.
-Then a maintainer reviews it.
+Then a maintainer reviews it, and closes it. The bug has to stay for the
+next learner, so here a closed report means **reviewed**, not rejected. (In
+a real project, a good report stays open until the bug is fixed.)
 
 Next: [Lesson 10: making the change](../10-making-the-change/).

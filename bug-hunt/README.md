@@ -6,7 +6,8 @@ project for [Lesson 09: Opening a good issue](../lessons/09-opening-an-issue/).
 **It has bugs on purpose.** This page says how `splitbill` *should*
 behave. Wherever the program does something different, you've found a bug.
 Find one, then report it with the **Bug hunt** issue form. A bot checks your
-report and a maintainer reviews it.
+report and a maintainer reviews it, then closes it: the bugs stay, so a
+closed report means reviewed, not rejected.
 
 Please don't open a pull request that fixes the bugs: the next learner
 needs them.
