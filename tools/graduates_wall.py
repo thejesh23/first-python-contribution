@@ -1,17 +1,25 @@
-"""Regenerate graduates/README.md from the files in graduates/ (Lesson 15).
+"""Regenerate the graduates wall from the files in graduates/ (Lesson 15).
 
 Usage::
 
     python tools/graduates_wall.py
 
+Writes ``graduates/README.md`` (photos and a table of every graduate) and the
+strip of photos at the bottom of the repo's ``README.md``, between the
+``<!-- graduates:start -->`` and ``<!-- graduates:end -->`` markers.
+
 Files are parsed with :mod:`ast`, never executed. Text is escaped so nobody's
-entry can inject links, images or HTML into the wall.
+entry can inject links, images or HTML into the wall. The photos are the
+public GitHub profile pictures of the usernames, served by GitHub.
 """
 
 from __future__ import annotations
 
+import html
 import re
+import subprocess
 import sys
+from dataclasses import dataclass
 from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parent))
@@ -36,7 +44,38 @@ def escape(text: str) -> str:
     return text.replace("://", ":​//")  # stop autolinking
 
 
-def rows(folder: Path) -> list[str]:
+START, END = "<!-- graduates:start -->", "<!-- graduates:end -->"
+STRIP_MAX = 30  # photos on the repo's front page; the wall shows everyone
+
+
+@dataclass
+class Graduate:
+    name: str
+    login: str
+    owner: str
+    repo: str
+    number: str
+    message: str
+    added: int = 0  # when the file was first committed (seconds), 0 if unknown
+
+
+def added_time(path: Path) -> int:
+    """When the graduate's file was first committed, so the newest can be shown first."""
+    try:
+        out = subprocess.run(
+            ["git", "log", "--diff-filter=A", "--format=%ct", "--", path.name],
+            cwd=path.parent,
+            capture_output=True,
+            text=True,
+            timeout=30,
+        ).stdout.split()
+    except (OSError, subprocess.SubprocessError):
+        return 0
+    return int(out[-1]) if out and out[-1].isdigit() else 0
+
+
+def graduates(folder: Path) -> list[Graduate]:
+    """Every valid graduate file, in alphabetical order of username."""
     out = []
     for path in sorted(folder.glob("*.py"), key=lambda p: p.stem.lower()):
         result, values = parse_source(path.read_text(encoding="utf-8"))
@@ -45,34 +84,81 @@ def rows(folder: Path) -> list[str]:
         m = PR_RE.match(values["pr"])
         if not m:
             continue
-        owner, repo, number = m.groups()
         login = values["github"]
         if not re.fullmatch(r"[A-Za-z0-9-]{1,39}", login):
             continue
-        out.append(
-            f"| {escape(values['name'])} | [@{login}](https://github.com/{login}) "
-            f"| [{owner}/{repo}#{number}](https://github.com/{owner}/{repo}/pull/{number}) "
-            f"| {escape(values['message'])} |"
-        )
+        out.append(Graduate(values["name"], login, *m.groups(), values["message"], added_time(path)))
     return out
 
 
+def rows(folder: Path) -> list[str]:
+    return [
+        f"| {escape(g.name)} | [@{g.login}](https://github.com/{g.login}) "
+        f"| [{g.owner}/{g.repo}#{g.number}](https://github.com/{g.owner}/{g.repo}/pull/{g.number}) "
+        f"| {escape(g.message)} |"
+        for g in graduates(folder)
+    ]
+
+
+def photos(people: list[Graduate], size: int) -> str:
+    """Linked GitHub profile pictures. The username is checked; the name is escaped."""
+    return "\n".join(
+        f'<a href="https://github.com/{g.login}"><img src="https://github.com/{g.login}.png?size={size * 2}" '
+        f'width="{size}" height="{size}" alt="@{g.login}" title="{html.escape(g.name, quote=True)}"></a>'
+        for g in people
+    )
+
+
+def count(n: int) -> str:
+    return f"{n} graduate{'s' if n != 1 else ''}"
+
+
 def render(folder: Path) -> str:
-    table = rows(folder)
-    if not table:
+    people = graduates(folder)
+    if not people:
         return HEADER + "No graduates yet. You could be the first!\n"
     return (
         HEADER
-        + f"**{len(table)} graduate{'s' if len(table) != 1 else ''}**\n\n"
-        + "| Name | GitHub | Contribution | Message |\n|---|---|---|---|\n"
-        + "\n".join(table)
+        + f"**{count(len(people))}**\n\n"
+        + photos(people, 64)
+        + "\n\n| Name | GitHub | Contribution | Message |\n|---|---|---|---|\n"
+        + "\n".join(rows(folder))
         + "\n"
     )
+
+
+def strip(folder: Path) -> str:
+    """The block for the repo's front page: the newest graduates' photos, and a link to the wall."""
+    people = graduates(folder)
+    join = "[Join them](lessons/15-capstone/)"
+    if not people:
+        return f"No graduates yet. You could be the first! {join}.\n"
+    newest = sorted(people, key=lambda g: (-g.added, g.login.lower()))[:STRIP_MAX]
+    more = f" These are the {STRIP_MAX} most recent." if len(people) > STRIP_MAX else ""
+    return (
+        f"**{count(len(people))}** finished the course with a pull request merged in a real open source "
+        f"project.{more} [See the wall](graduates/) · {join}\n\n" + photos(newest, 48) + "\n"
+    )
+
+
+def update_front_page(text: str, block: str) -> str:
+    """Replace what is between the markers. Text without both markers comes back unchanged."""
+    before, start, rest = text.partition(START)
+    _, end, after = rest.partition(END)
+    if not start or not end:
+        return text
+    return f"{before}{START}\n{block}{END}{after}"
 
 
 def main() -> int:
     (FOLDER / "README.md").write_text(render(FOLDER), encoding="utf-8")
     print(f"Wrote {(FOLDER / 'README.md').relative_to(ROOT)}")
+    front = ROOT / "README.md"
+    text = front.read_text(encoding="utf-8")
+    updated = update_front_page(text, strip(FOLDER))
+    if updated != text:
+        front.write_text(updated, encoding="utf-8")
+        print("Updated the graduates in README.md")
     return 0
 
 
