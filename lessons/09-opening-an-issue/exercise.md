@@ -21,6 +21,7 @@ the way a maintainer would want.
       Use the form in the browser, not `gh issue create`: the form adds the `bug-hunt` label the bot looks for,
       and only maintainers can add labels from the command line
 - [ ] Read the bot's comment. Fix any ✘ by editing your issue (**···** → **Edit**); the bot checks again when you save
+- [ ] A maintainer reviews your report and then closes it. Closed here means reviewed, not rejected: the bug stays
 
 Please **don't** open a pull request that fixes the bug: the next learner
 needs it.
