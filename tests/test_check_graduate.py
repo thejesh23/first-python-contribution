@@ -129,10 +129,49 @@ def test_wall_escapes_and_lists(tmp_path):
     text = wall.render(tmp_path)
     assert "**1 graduate**" in text
     assert "[psf/requests#123](https://github.com/psf/requests/pull/123)" in text
-    assert re.search(r"(?<!\\)<img", text) is None and "\\<img" in text
+    assert "\\<img src=x\\>" in text, "the message's own <img> must be escaped"
+    images = re.findall(r"(?<!\\)<img [^>]*>", text)
+    assert len(images) == 1 and 'src="https://github.com/ada.png?size=128"' in images[0], "only the profile picture"
     assert "](https://evil)" not in text
     assert "\\|" in text
 
 
 def test_wall_empty(tmp_path):
     assert "No graduates yet" in wall.render(tmp_path)
+
+
+def test_photos_link_to_profiles_and_escape_names(tmp_path):
+    risky = "name = 'Ada \"><script>x</script>'\n"
+    (tmp_path / "ada.py").write_text(risky + GOOD.split("\n", 1)[1])
+    text = wall.render(tmp_path)
+    assert '<a href="https://github.com/ada"><img src="https://github.com/ada.png?size=128"' in text
+    assert 'alt="@ada"' in text and 'width="64" height="64"' in text
+    assert "<script>" not in text and "&lt;script&gt;" in text
+    assert 'title="Ada &quot;&gt;' in text, "the name can't break out of the title"
+
+
+def test_front_page_strip_shows_the_newest_and_links_to_the_wall(tmp_path, monkeypatch):
+    for n in range(wall.STRIP_MAX + 5):
+        (tmp_path / f"user{n:02}.py").write_text(GOOD.replace('"ada"', f'"user{n:02}"'))
+    monkeypatch.setattr(wall, "added_time", lambda path: int(path.stem[4:]))  # user34 is the newest
+    block = wall.strip(tmp_path)
+    assert f"**{wall.STRIP_MAX + 5} graduates**" in block and "[See the wall](graduates/)" in block
+    assert block.count("<img ") == wall.STRIP_MAX
+    assert "user34.png" in block and "user05.png" in block and "user04.png" not in block
+    assert block.index("user34.png") < block.index("user33.png"), "newest first"
+    assert 'width="48" height="48"' in block
+    assert "You could be the first" in wall.strip(tmp_path / "nobody")
+
+
+def test_front_page_is_only_changed_between_the_markers():
+    page = f"# Title\n\ntext\n\n{wall.START}\nold\n{wall.END}\n\n## License\n"
+    updated = wall.update_front_page(page, "new\n")
+    assert updated == f"# Title\n\ntext\n\n{wall.START}\nnew\n{wall.END}\n\n## License\n"
+    assert wall.update_front_page(updated, "new\n") == updated, "running it twice changes nothing"
+    assert wall.update_front_page("no markers here", "new\n") == "no markers here"
+
+
+def test_the_repo_front_page_has_the_markers():
+    text = (wall.ROOT / "README.md").read_text(encoding="utf-8")
+    assert text.count(wall.START) == 1 and text.count(wall.END) == 1
+    assert text.index(wall.START) < text.index(wall.END)
