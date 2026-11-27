@@ -198,10 +198,15 @@ like Steps 5 and 6.
 > **No checks yet?** GitHub doesn't run a newcomer's checks until a
 > maintainer approves them. If your Lesson 02 pull request isn't merged
 > (you skipped it, or the bot is still waiting for a fix), this check waits
-> too: `gh pr checks` reports no checks, and the pull request page says a
-> workflow is awaiting approval. Finish Lesson 02 first, or wait: a
-> maintainer approves the run, usually within a day. Then run
-> `gh pr checks --watch` again.
+> too: `gh pr checks` says `no checks reported on the 'exercise-2' branch`,
+> and the pull request page says a workflow is awaiting approval. Two ways
+> out:
+>
+> - Finish Lesson 02. Once that pull request is merged, push any new commit
+>   to this branch (Stretch 1 in the exercise is a good one). The check
+>   then starts by itself. The run that was held does not restart on its
+>   own.
+> - Or wait: a maintainer approves the held run, usually within a day.
 
 When it finishes, a separate review bot checks your file names and that your
 code only contains what it should. It doesn't appear in the checks list:
