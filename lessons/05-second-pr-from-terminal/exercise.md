@@ -9,7 +9,8 @@
 - [ ] Commit only your two files, then `git push -u origin exercise-2`
 - [ ] `gh pr create --fill` (after `gh repo set-default thejesh23/first-python-contribution`)
 - [ ] `gh pr checks --watch` until the check is green, then wait for the bot's comment and the merge
-      (no checks yet? Your first run waits for a maintainer's approval until your Lesson 02 PR is merged)
+      (no checks yet? Your first run waits for a maintainer's approval until your Lesson 02 PR is merged.
+      After that merge, push one more commit and the check starts by itself)
 - [ ] Tidy up: `git switch main`, `git pull upstream main`, `git branch -d exercise-2`
 
 **Stretch 1:** add a second test, for example that `greet("")` still returns
