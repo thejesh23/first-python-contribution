@@ -288,7 +288,9 @@ def main(argv: list[str] | None = None) -> int:
     parser.add_argument("--tests", required=True, help="conclusion of the Exercise 2 tests run")
     parser.add_argument("--run-url", default="")
     args = parser.parse_args(argv)
-    if not is_learner_pr(_git("diff", "--no-renames", "--name-only", f"{args.base}...{args.head}").splitlines()):
+    if not is_learner_pr(
+        _git("diff", "--no-renames", "--diff-filter=d", "--name-only", f"{args.base}...{args.head}").splitlines()
+    ):
         return NOT_A_LEARNER_PR
     result = validate(args.login, args.base, args.head)
     print(format_comment(result, args.login, args.tests, args.run_url))
