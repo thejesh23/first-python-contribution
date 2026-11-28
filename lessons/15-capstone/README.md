@@ -90,7 +90,11 @@ Once your PR is merged, in **this course repo**:
    message = "One sentence: what you changed, or what you learned"
    ```
 
-3. Commit, push, and open a pull request, like Lesson 05.
+3. Commit, push, and open a pull request, like Lesson 05. If the push is
+   refused with `without workflow scope`, the course changed a workflow file
+   since you forked:
+   [Troubleshooting, section 13](../A-troubleshooting/#13-push-refused-workflow-scope)
+   has the one-command fix.
 
 The **Validate graduate** bot looks up your PR on GitHub and checks it's
 merged, yours, merged by someone else, and in a real project you don't own.

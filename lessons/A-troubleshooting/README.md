@@ -26,6 +26,7 @@ read the fix.
 | `python3: command not found` (Windows) | [10. Python environment](#10-python-and-pip-problems) |
 | PR opened against your own fork | [11. PR in the wrong place](#11-pr-opened-in-the-wrong-place) |
 | `.venv` or other junk in your PR | [12. Files that shouldn't be committed](#12-files-that-shouldnt-be-committed) |
+| `refusing to allow an OAuth App to create or update workflow ... without workflow scope` | [13. Push refused: workflow scope](#13-push-refused-workflow-scope) |
 | Checks say "awaiting approval" | [Lesson 12](../12-ci-and-review/) (just wait) |
 
 **Practise the fixes safely:** sections 3–7 come with a sandbox that
@@ -332,6 +333,28 @@ git push
 
 Many projects already ignore these. If theirs doesn't, don't add your own
 entries to *their* `.gitignore` in the same PR: just remove the files.
+
+## 13. Push refused: workflow scope
+
+```text
+! [remote rejected] my-branch -> my-branch (refusing to allow an OAuth App to
+create or update workflow `.github/workflows/....yml` without `workflow` scope)
+```
+
+You did nothing wrong. Since you forked, the original project changed one of
+its GitHub Actions workflow files (in `.github/workflows/`). Your branch
+carries that change into your fork, and the login `gh auth login` made isn't
+allowed to change workflow files. `gh repo sync` stops for the same reason.
+
+Give your login that one extra permission, then push again:
+
+```bash norun
+gh auth refresh -h github.com -s workflow
+git push
+```
+
+It shows a one-time code and opens your browser, as in Lesson 03. You only
+do this once.
 
 ## Clean up the sandbox
 

@@ -171,6 +171,10 @@ git push -u origin exercise-2
 `-u` remembers that this branch goes to `origin`, so next time a plain
 `git push` is enough.
 
+Push refused with `without workflow scope`? The course changed a workflow
+file after you forked. One command fixes it:
+[Troubleshooting, section 13](../A-troubleshooting/#13-push-refused-workflow-scope).
+
 ## Step 9: Open the pull request
 
 ```bash norun
