@@ -156,6 +156,7 @@ def test_front_page_strip_shows_the_newest_and_links_to_the_wall(tmp_path, monke
     monkeypatch.setattr(wall, "added_time", lambda path: int(path.stem[4:]))  # user34 is the newest
     block = wall.strip(tmp_path)
     assert f"**{wall.STRIP_MAX + 5} graduates**" in block and "[See the wall](graduates/)" in block
+    assert f"Here are the {wall.STRIP_MAX} most recent, newest first." in block
     assert block.count("<img ") == wall.STRIP_MAX
     assert "user34.png" in block and "user05.png" in block and "user04.png" not in block
     assert block.index("user34.png") < block.index("user33.png"), "newest first"
@@ -206,3 +207,14 @@ def test_newest_means_merged_last_not_written_last(tmp_path, monkeypatch):
     assert wall.added_time(tmp_path / "early.py") > wall.added_time(tmp_path / "late.py")
     block = wall.strip(tmp_path)
     assert block.index("early.png") < block.index("late.png"), "merged last, shown first"
+
+
+def test_the_wall_shows_the_newest_first_and_says_so(tmp_path, monkeypatch):
+    for login in ("anna", "zed"):
+        (tmp_path / f"{login}.py").write_text(GOOD.replace('"ada"', f'"{login}"'))
+    monkeypatch.setattr(wall, "added_time", lambda path: {"anna": 1, "zed": 2}[path.stem])  # zed is the newest
+    page = wall.render(tmp_path)
+    assert "**2 graduates**, the most recent first." in page
+    assert page.index("zed.png") < page.index("anna.png"), "photos: newest first"
+    assert page.index("[@zed]") < page.index("[@anna]"), "table: newest first"
+    assert "The most recent is first." in wall.strip(tmp_path)

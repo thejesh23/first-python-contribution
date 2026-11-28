@@ -95,12 +95,17 @@ def graduates(folder: Path) -> list[Graduate]:
     return out
 
 
+def newest_first(people: list[Graduate]) -> list[Graduate]:
+    """The most recently merged graduate first; usernames break ties."""
+    return sorted(people, key=lambda g: (-g.added, g.login.lower()))
+
+
 def rows(folder: Path) -> list[str]:
     return [
         f"| {escape(g.name)} | [@{g.login}](https://github.com/{g.login}) "
         f"| [{g.owner}/{g.repo}#{g.number}](https://github.com/{g.owner}/{g.repo}/pull/{g.number}) "
         f"| {escape(g.message)} |"
-        for g in graduates(folder)
+        for g in newest_first(graduates(folder))
     ]
 
 
@@ -123,8 +128,8 @@ def render(folder: Path) -> str:
         return HEADER + "No graduates yet. You could be the first!\n"
     return (
         HEADER
-        + f"**{count(len(people))}**\n\n"
-        + photos(people, 64)
+        + f"**{count(len(people))}**, the most recent first.\n\n"
+        + photos(newest_first(people), 64)
         + "\n\n| Name | GitHub | Contribution | Message |\n|---|---|---|---|\n"
         + "\n".join(rows(folder))
         + "\n"
@@ -137,11 +142,15 @@ def strip(folder: Path) -> str:
     join = "[Join them](lessons/15-capstone/)"
     if not people:
         return f"No graduates yet. You could be the first! {join}.\n"
-    newest = sorted(people, key=lambda g: (-g.added, g.login.lower()))[:STRIP_MAX]
-    more = f" These are the {STRIP_MAX} most recent." if len(people) > STRIP_MAX else ""
+    newest = newest_first(people)[:STRIP_MAX]
+    order = (
+        f"Here are the {STRIP_MAX} most recent, newest first."
+        if len(people) > STRIP_MAX
+        else "The most recent is first."
+    )
     return (
         f"**{count(len(people))}** finished the course with a pull request merged in a real open source "
-        f"project.{more} [See the wall](graduates/) · {join}\n\n" + photos(newest, 48) + "\n"
+        f"project. {order} [See the wall](graduates/) · {join}\n\n" + photos(newest, 48) + "\n"
     )
 
 
