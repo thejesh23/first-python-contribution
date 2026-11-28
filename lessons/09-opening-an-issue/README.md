@@ -133,4 +133,6 @@ Then a maintainer reviews it, and closes it. The bug has to stay for the
 next learner, so here a closed report means **reviewed**, not rejected. (In
 a real project, a good report stays open until the bug is fixed.)
 
+**See an example** (made for this course): [a bug-hunt report](https://github.com/thejesh23/first-python-contribution/issues/72) made with the form, the bot's check, and the maintainer's review.
+
 Next: [Lesson 10: making the change](../10-making-the-change/).

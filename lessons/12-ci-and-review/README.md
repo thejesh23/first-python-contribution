@@ -162,6 +162,8 @@ git push
 Then reply on the review comment with one short line, for example:
 "Added in 3f2a1b9." Naming the commit lets the reviewer check it in one click.
 
+**See an example** (made for this course): [a review with changes requested](https://github.com/thejesh23/graduation-test-project/pull/3/files): an inline comment, the fix as a new commit, a one-line reply naming it, then approval and merge.
+
 **Review etiquette:**
 
 - **New commits while review is going on.** They let reviewers see exactly

@@ -64,6 +64,8 @@ That's the whole thing: under 60 words. **Short is good.** Long
 descriptions with headings and bullet lists, for a three-line change, are
 what maintainers have learned to skip (Lesson 13 shows why).
 
+**See an example** (made for this course): [a pull request to another project](https://github.com/thejesh23/graduation-test-project/pull/3) with this shape: `Fixes #2`, what and why, and how it was tested. Merging it closed the issue.
+
 ### When the project has a template
 
 Many projects keep a `pull_request_template.md` (in the repo root, `docs/`

@@ -103,7 +103,7 @@ Does that sound right?
 ```
 
 That shows you read the issue, checked it still happens, and have a plan,
-so a maintainer can answer in one line. Then **wait** for a reply if the
+so a maintainer can answer in one line. **See an example** (made for this course): [a claim and the maintainer's one-line answer](https://github.com/thejesh23/graduation-test-project/issues/2). Then **wait** for a reply if the
 project assigns issues. Silence for a few days is normal.
 
 **Don't:**

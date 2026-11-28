@@ -217,6 +217,8 @@ code only contains what it should. It doesn't appear in the checks list:
 about a minute later it **comments** on your PR. If everything passed, a
 maintainer reviews your PR and merges it.
 
+**See an example** (made for this course): [an Exercise 2 pull request](https://github.com/thejesh23/first-python-contribution/pull/71): the title from `--fill`, the `test` check, the review bot's comment and the merge.
+
 Read the bot's comment with:
 
 ```bash norun
