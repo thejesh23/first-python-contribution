@@ -63,7 +63,8 @@ def added_time(path: Path) -> int:
     """When the graduate's file landed on this branch, so the newest graduates come first.
 
     ``--first-parent`` follows the branch's own history, so this is the time
-    of the merge that brought the file in, not when the learner wrote it.
+    of the merge that brought the file in, not when the learner wrote it. If
+    the file was removed and added again, the latest addition counts.
     """
     try:
         out = subprocess.run(
@@ -75,7 +76,7 @@ def added_time(path: Path) -> int:
         ).stdout.split()
     except (OSError, subprocess.SubprocessError):
         return 0
-    return int(out[-1]) if out and out[-1].isdigit() else 0
+    return int(out[0]) if out and out[0].isdigit() else 0  # git log lists the newest first
 
 
 def graduates(folder: Path) -> list[Graduate]:

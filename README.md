@@ -65,8 +65,8 @@ a key, add `--voice Aman` to narrate with a macOS voice instead.
 <!-- graduates:start -->
 **3 graduates** finished the course with a pull request merged in a real open source project. The most recent is first. [See the wall](graduates/) · [Join them](lessons/15-capstone/)
 
-<a href="https://github.com/divya0795"><img src="https://github.com/divya0795.png?size=96" width="48" height="48" alt="@divya0795" title="Divya"></a>
 <a href="https://github.com/karthikaun"><img src="https://github.com/karthikaun.png?size=96" width="48" height="48" alt="@karthikaun" title="Karthik"></a>
+<a href="https://github.com/divya0795"><img src="https://github.com/divya0795.png?size=96" width="48" height="48" alt="@divya0795" title="Divya"></a>
 <a href="https://github.com/thejesh23"><img src="https://github.com/thejesh23.png?size=96" width="48" height="48" alt="@thejesh23" title="Thejesh"></a>
 <!-- graduates:end -->
 

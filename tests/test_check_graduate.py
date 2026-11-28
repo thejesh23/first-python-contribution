@@ -218,3 +218,28 @@ def test_the_wall_shows_the_newest_first_and_says_so(tmp_path, monkeypatch):
     assert page.index("zed.png") < page.index("anna.png"), "photos: newest first"
     assert page.index("[@zed]") < page.index("[@anna]"), "table: newest first"
     assert "The most recent is first." in wall.strip(tmp_path)
+
+
+def test_a_graduate_added_again_counts_from_the_latest_addition(tmp_path):
+    """Seen with #63, #67 and #68: added, removed, added again. The newest addition is what counts."""
+
+    def git(*args, when=None):
+        import os
+
+        env = {**os.environ, "GIT_AUTHOR_DATE": when, "GIT_COMMITTER_DATE": when} if when else None
+        return subprocess.run(
+            ["git", *args], cwd=tmp_path, check=True, capture_output=True, text=True, env=env
+        ).stdout.strip()
+
+    git("init", "-q", "-b", "main")
+    git("config", "user.email", "t@example.com")
+    git("config", "user.name", "t")
+    (tmp_path / "ada.py").write_text(GOOD)
+    git("add", ".")
+    git("commit", "-qm", "add", when="2026-01-01T00:00:00")
+    git("rm", "-q", "ada.py")
+    git("commit", "-qm", "remove", when="2026-01-02T00:00:00")
+    (tmp_path / "ada.py").write_text(GOOD)
+    git("add", ".")
+    git("commit", "-qm", "add again", when="2026-01-03T00:00:00")
+    assert wall.added_time(tmp_path / "ada.py") == int(git("log", "-1", "--format=%ct"))
