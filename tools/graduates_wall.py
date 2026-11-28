@@ -56,14 +56,18 @@ class Graduate:
     repo: str
     number: str
     message: str
-    added: int = 0  # when the file was first committed (seconds), 0 if unknown
+    added: int = 0  # when the file landed on this branch (seconds), 0 if unknown
 
 
 def added_time(path: Path) -> int:
-    """When the graduate's file was first committed, so the newest can be shown first."""
+    """When the graduate's file landed on this branch, so the newest graduates come first.
+
+    ``--first-parent`` follows the branch's own history, so this is the time
+    of the merge that brought the file in, not when the learner wrote it.
+    """
     try:
         out = subprocess.run(
-            ["git", "log", "--diff-filter=A", "--format=%ct", "--", path.name],
+            ["git", "log", "--first-parent", "--diff-filter=A", "--format=%ct", "--", path.name],
             cwd=path.parent,
             capture_output=True,
             text=True,
