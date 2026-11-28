@@ -102,6 +102,8 @@ If everything checks out, it comments 🎓, and once a maintainer merges it you
 appear on the [graduates wall](../../graduates/). If not, its comment says exactly what's
 wrong.
 
+**See an example** (made for this course): [a graduate pull request](https://github.com/thejesh23/first-python-contribution/pull/73), linking [a merged contribution to another project](https://github.com/thejesh23/graduation-test-project/pull/3).
+
 Contributed somewhere other than GitHub (GitLab, Codeberg, a mailing list)?
 Congratulations, that counts too. The bot can only check GitHub, so
 [open an issue](https://github.com/thejesh23/first-python-contribution/issues/new)

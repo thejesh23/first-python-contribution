@@ -78,6 +78,8 @@ Within a minute or two:
   your fork (open your file, click the ✏️ pencil, commit). Your PR updates
   automatically and the check runs again.
 
+**See an example** (made for this course): [a first pull request](https://github.com/thejesh23/first-python-contribution/pull/70), opened from the fork's **Contribute** button, checked and merged by the bot 15 seconds later.
+
 ## What you just did
 
 That's the same workflow behind every open source contribution: **fork →
