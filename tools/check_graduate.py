@@ -21,7 +21,8 @@ Usage (in CI)::
     python tools/check_graduate.py --login LOGIN --base BASE --head HEAD
 
 Prints a Markdown comment; exits 0 if valid, 1 if not, 3 (silently) if the PR
-doesn't touch ``graduates/<name>.py`` at all.
+doesn't add or change any ``graduates/<name>.py`` (a maintainer removing an
+entry only deletes, so the bot stays quiet).
 """
 
 from __future__ import annotations
@@ -198,7 +199,9 @@ def main(argv: list[str] | None = None) -> int:
     parser.add_argument("--base", required=True)
     parser.add_argument("--head", required=True)
     args = parser.parse_args(argv)
-    if not is_learner_pr(_git("diff", "--no-renames", "--name-only", f"{args.base}...{args.head}").splitlines()):
+    if not is_learner_pr(
+        _git("diff", "--no-renames", "--diff-filter=d", "--name-only", f"{args.base}...{args.head}").splitlines()
+    ):
         return NOT_A_LEARNER_PR
     result = validate(args.login, args.base, args.head)
     print(format_comment(result, args.login))

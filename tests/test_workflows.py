@@ -72,3 +72,43 @@ def test_bug_report_bot_only_comments():
     # The issue text reaches the checker only through env: never ${{ }} inside run:
     for block in re.findall(r"run: \|\n((?:\s{10}.*\n?)+)", text):
         assert "${{" not in block
+
+
+def test_the_bots_stay_quiet_when_a_maintainer_only_deletes_entries(tmp_path, monkeypatch, capsys):
+    """Removing a graduate or a first commit is maintainer clean-up, not a learner's PR to check."""
+    import subprocess
+    import sys
+
+    sys.path.insert(0, str(WORKFLOWS.parent.parent / "tools"))
+    import check_exercise_2
+    import check_first_commit
+    import check_graduate
+
+    def git(*args):
+        return subprocess.run(["git", *args], cwd=tmp_path, check=True, capture_output=True, text=True).stdout.strip()
+
+    git("init", "-q", "-b", "main")
+    git("config", "user.email", "t@example.com")
+    git("config", "user.name", "t")
+    files = {
+        "graduates/ada.py": 'name = "Ada"\ngithub = "ada"\npr = "https://github.com/o/r/pull/1"\nmessage = "hi"\n',
+        "first-commits/ada.py": 'name = "Ada"\ngithub = "ada"\nmessage = "hi"\n',
+        "practice/greetings/ada.py": "def greet(name: str) -> str:\n    return name\n",
+        "practice/tests/test_ada.py": "from greetings.ada import greet\n",
+    }
+    for path, text in files.items():
+        (tmp_path / path).parent.mkdir(parents=True, exist_ok=True)
+        (tmp_path / path).write_text(text)
+    git("add", ".")
+    git("commit", "-qm", "entries")
+    base = git("rev-parse", "HEAD")
+    git("rm", "-q", *files)
+    git("commit", "-qm", "maintainer removes the test entries")
+    head = git("rev-parse", "HEAD")
+    monkeypatch.chdir(tmp_path)
+
+    args = ["--login", "maintainer", "--base", base, "--head", head]
+    assert check_graduate.main(args) == check_graduate.NOT_A_LEARNER_PR
+    assert check_first_commit.main(args) == check_first_commit.NOT_A_LEARNER_PR
+    assert check_exercise_2.main([*args, "--tests", "success"]) == check_exercise_2.NOT_A_LEARNER_PR
+    assert capsys.readouterr().out == ""

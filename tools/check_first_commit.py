@@ -220,7 +220,8 @@ def main(argv: list[str] | None = None) -> int:
     parser.add_argument("--base", required=True)
     parser.add_argument("--head", required=True)
     args = parser.parse_args(argv)
-    paths = _git("diff", "--no-renames", "--name-only", f"{args.base}...{args.head}").splitlines()
+    # Deleted files are left out: a maintainer removing an entry isn't a learner's PR, so the bot stays quiet.
+    paths = _git("diff", "--no-renames", "--diff-filter=d", "--name-only", f"{args.base}...{args.head}").splitlines()
     if not is_learner_pr(paths):
         return NOT_A_LEARNER_PR
     from check_exercise_2 import is_learner_pr as is_exercise_2_pr  # imported here: that module imports this one
