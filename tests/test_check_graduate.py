@@ -175,3 +175,34 @@ def test_the_repo_front_page_has_the_markers():
     text = (wall.ROOT / "README.md").read_text(encoding="utf-8")
     assert text.count(wall.START) == 1 and text.count(wall.END) == 1
     assert text.index(wall.START) < text.index(wall.END)
+
+
+def test_newest_means_merged_last_not_written_last(tmp_path, monkeypatch):
+    """A learner can write their file days before it's merged; the strip orders by the merge."""
+
+    def git(*args, when=None):
+        env = None
+        if when:
+            import os
+
+            env = {**os.environ, "GIT_AUTHOR_DATE": when, "GIT_COMMITTER_DATE": when}
+        return subprocess.run(
+            ["git", *args], cwd=tmp_path, check=True, capture_output=True, text=True, env=env
+        ).stdout.strip()
+
+    git("init", "-q", "-b", "main")
+    git("config", "user.email", "t@example.com")
+    git("config", "user.name", "t")
+    git("commit", "-q", "--allow-empty", "-m", "base", when="2026-01-01T00:00:00")
+    for login, written, merged in (("early", "2026-01-02T00:00:00", "2026-01-10T00:00:00"),
+                                   ("late", "2026-01-05T00:00:00", "2026-01-06T00:00:00")):  # fmt: skip
+        git("switch", "-q", "-c", login, "main")
+        (tmp_path / f"{login}.py").write_text(GOOD.replace('"ada"', f'"{login}"'))
+        git("add", ".")
+        git("commit", "-qm", login, when=written)
+        git("switch", "-q", "main")
+        git("merge", "-q", "--no-ff", login, "-m", f"merge {login}", when=merged)
+
+    assert wall.added_time(tmp_path / "early.py") > wall.added_time(tmp_path / "late.py")
+    block = wall.strip(tmp_path)
+    assert block.index("early.png") < block.index("late.png"), "merged last, shown first"
